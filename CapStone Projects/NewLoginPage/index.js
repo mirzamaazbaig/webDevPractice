@@ -2,7 +2,7 @@ import express from "express";
 
 const app = express();
 const port = 3000;
-
+let currentUser = null;
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 const usersList = [
@@ -30,25 +30,41 @@ const usersList = [
         "password": "michaelwpass"
     }
 ];
+
+const authenticateUser = (username, password) => {
+    const user = usersList.find(u => u.username === username);
+    if (user && user.password === password) {
+        currentUser = user; // Set global currentUser
+        return true;
+    }
+    return false;
+};
+
 app.get('/', (req, res) => {
     res.render('index.ejs');
 });
+
+app.get('/userinfo', (req, res) => {
+    if (currentUser) {
+        res.render('userinfo.ejs', { user: currentUser }); // Pass currentUser as user to EJS
+    } else {
+        res.send("You need to login");
+    }
+});
+
+app.get('/dashboard', (req, res) => {
+    res.render('dashboard.ejs');
+});
+
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
 
-    const user = usersList.find(u => u.username === username);
-
-    if (user) {
-        if (user.password === password) {
-            res.send("Login successful");
-        } else {
-            alert('Incorrect password')
-        }
+    if (authenticateUser(username, password)) {
+        res.render('dashboard.ejs'); // Pass currentUser as user to EJS
     } else {
-        res.send("Username not found");
+        res.send("Invalid username or password");
     }
 
-    console.log(req.body);
 });
 app.listen(port, () => {
     console.log(`Server running on ${port}`);
