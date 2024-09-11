@@ -41,8 +41,7 @@ app.post("/register", async (req, res) => {
       res.send("Email already Registered, try Logging in.");
     } else {
       const result = await db.query("INSERT INTO users (email, password) VALUES ($1, $2)", [email, password]);
-      console.log(result)
-      res.render("secrets.ejs");
+      res.render("login.ejs");
     }
   } catch (error) {
     console.log(error);
@@ -52,8 +51,24 @@ app.post("/register", async (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
-  console.log(req.body.username);
-  console.log(req.body.password);
+  const email = req.body.username;
+  const password = req.body.password;
+  try {
+    const result = await db.query("SELECT * FROM users WHERE email = $1", [email]);
+
+    if (result.rows.length > 0) {
+      const storedPassword = result.rows[0].password;
+      if (password === storedPassword) {
+        res.render("secrets.ejs");
+      } else {
+        res.send("Incorrect Password!!");
+      }
+    } else {
+      res.send("User Not Found!!");
+    }
+  } catch (error) {
+    console.log(error)
+  }
 });
 
 app.listen(port, () => {
