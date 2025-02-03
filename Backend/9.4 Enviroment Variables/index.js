@@ -1,11 +1,11 @@
-import express from "express";
-import bodyParser from "body-parser";
-import pg from "pg";
 import bcrypt from "bcrypt";
+import bodyParser from "body-parser";
+import env from "dotenv";
+import express from "express";
+import session from "express-session";
 import passport from "passport";
 import { Strategy } from "passport-local";
-import session from "express-session";
-import env from "dotenv";
+import pg from "pg";
 
 const app = express();
 const port = 3000;
@@ -14,7 +14,7 @@ env.config();
 
 app.use(
   session({
-    secret: "TOPSECRETWORD",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
   })
